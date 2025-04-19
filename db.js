@@ -170,8 +170,8 @@ const initDatabase = () => {
       VALUES (?, ?, ?, ?)
     `);
     
-    examInsertStmt.run('Introduction to Mathematics', 'Basic mathematics concepts test', 15, 3);
-    examInsertStmt.run('Computer Science Fundamentals', 'Test covering basic CS concepts', 30, 3);
+    examInsertStmt.run('Introduction to Mathematics', 'Basic mathematics concepts test', 15, 10);
+    examInsertStmt.run('Computer Science Fundamentals', 'Test covering basic CS concepts', 30, 10);
     
     // Get the exam IDs
     const mathExamId = db.prepare('SELECT id FROM exams WHERE title = ?').get('Introduction to Mathematics').id;
@@ -183,14 +183,29 @@ const initDatabase = () => {
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `);
     
+    // Basic Math Questions
     questionInsertStmt.run(mathExamId, 'What is 2 + 2?', '3', '4', '5', '6', 'B');
     questionInsertStmt.run(mathExamId, 'What is 10 * 5?', '50', '60', '40', '55', 'A');
     questionInsertStmt.run(mathExamId, 'What is the square root of 16?', '2', '3', '4', '6', 'C');
+    questionInsertStmt.run(mathExamId, 'If x + 5 = 12, what is the value of x?', '5', '7', '8', '17', 'B');
+    questionInsertStmt.run(mathExamId, 'What is the area of a rectangle with length 8 units and width 3 units?', '11 square units', '24 square units', '16 square units', '18 square units', 'B');
+    questionInsertStmt.run(mathExamId, 'Which of the following is a prime number?', '9', '15', '17', '21', 'C');
+    questionInsertStmt.run(mathExamId, 'What is 20% of 80?', '4', '8', '16', '20', 'C');
+    questionInsertStmt.run(mathExamId, 'If 3x = 15, then x = ?', '3', '5', '12', '45', 'B');
+    questionInsertStmt.run(mathExamId, 'What is the next number in the sequence: 2, 4, 8, 16, ...?', '18', '24', '32', '64', 'C');
+    questionInsertStmt.run(mathExamId, 'If a triangle has angles of 45°, 45°, and 90°, what type of triangle is it?', 'Equilateral', 'Isosceles', 'Scalene', 'Obtuse', 'B');
     
-    // Insert sample questions for CS exam
+    // Computer Science Questions
     questionInsertStmt.run(csExamId, 'What does CPU stand for?', 'Central Processing Unit', 'Central Program Unit', 'Computer Personal Unit', 'Central Processor Unifier', 'A');
     questionInsertStmt.run(csExamId, 'Which of these is not a programming language?', 'Java', 'Python', 'Microsoft', 'C++', 'C');
     questionInsertStmt.run(csExamId, 'What does HTML stand for?', 'Hyper Text Markup Language', 'High Tech Modern Language', 'Hyper Transfer Markup Language', 'Hyper Text Modern Links', 'A');
+    questionInsertStmt.run(csExamId, 'What is the purpose of CSS in web development?', 'To define the structure of a webpage', 'To add interactivity to a webpage', 'To style the visual presentation of a webpage', 'To handle server-side logic', 'C');
+    questionInsertStmt.run(csExamId, 'Which of the following is not a data structure?', 'Array', 'Queue', 'Tree', 'Function', 'D');
+    questionInsertStmt.run(csExamId, 'What does SQL stand for?', 'Structured Query Language', 'Simple Question Language', 'System Quality License', 'Standard Query Lookup', 'A');
+    questionInsertStmt.run(csExamId, 'Which of the following is a client-side scripting language?', 'PHP', 'JavaScript', 'Python', 'Java', 'B');
+    questionInsertStmt.run(csExamId, 'What is the correct way to declare a variable in JavaScript?', 'variable x;', 'var = x;', 'var x;', 'x = var;', 'C');
+    questionInsertStmt.run(csExamId, 'What does DNS stand for?', 'Domain Name System', 'Data Network Service', 'Digital Network Security', 'Dynamic Node Server', 'A');
+    questionInsertStmt.run(csExamId, 'Which of the following is not a database management system?', 'MySQL', 'MongoDB', 'Oracle', 'Photoshop', 'D');
     
     console.log('Sample data inserted into the database');
   }

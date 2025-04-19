@@ -18,6 +18,7 @@
                     <th>Exam Title</th>
                     <th>Duration</th>
                     <th>Total Questions</th>
+                    <th>Description</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -27,6 +28,7 @@
                       <td><%= exam.title %></td>
                       <td><%= exam.duration %> minutes</td>
                       <td><%= exam.total_questions %></td>
+                      <td><%= exam.description %></td>
                       <td>
                         <a href="/exams/start/<%= exam.id %>" class="btn btn-primary btn-sm">
                           Start Exam
