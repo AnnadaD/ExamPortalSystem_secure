@@ -1,0 +1,90 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <h1 class="mb-4">Welcome, <%= user.fullname %></h1>
+  
+  <div class="row">
+    <div class="col-md-8">
+      <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">Available Exams</h3>
+        </div>
+        <div class="card-body">
+          <% if (exams && exams.length > 0) { %>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead>
+                  <tr>
+                    <th>Exam Title</th>
+                    <th>Duration</th>
+                    <th>Total Questions</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% exams.forEach(function(exam) { %>
+                    <tr>
+                      <td><%= exam.title %></td>
+                      <td><%= exam.duration %> minutes</td>
+                      <td><%= exam.total_questions %></td>
+                      <td>
+                        <a href="/exams/start/<%= exam.id %>" class="btn btn-primary btn-sm">
+                          Start Exam
+                        </a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                </tbody>
+              </table>
+            </div>
+          <% } else { %>
+            <div class="alert alert-info">No exams available at the moment.</div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-4">
+      <div class="card shadow">
+        <div class="card-header bg-info text-white">
+          <h3 class="mb-0">Your Exam Results</h3>
+        </div>
+        <div class="card-body">
+          <% if (completedExams && completedExams.length > 0) { %>
+            <ul class="list-group">
+              <% completedExams.forEach(function(result) { %>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                  <div>
+                    <% 
+                      const examTitle = exams.find(e => e.id === result.exam_id)?.title || 'Unknown Exam';
+                    %>
+                    <%= examTitle %>
+                    <span class="badge bg-<%= result.score >= 60 ? 'success' : 'danger' %> rounded-pill">
+                      <%= result.score.toFixed(1) %>%
+                    </span>
+                  </div>
+                  <a href="/exams/results/<%= result.id %>" class="btn btn-sm btn-outline-secondary">View</a>
+                </li>
+              <% }); %>
+            </ul>
+          <% } else { %>
+            <div class="alert alert-info">You haven't completed any exams yet.</div>
+          <% } %>
+        </div>
+      </div>
+      
+      <div class="card shadow mt-4">
+        <div class="card-header bg-secondary text-white">
+          <h3 class="mb-0">Quick Links</h3>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="/profile" class="btn btn-outline-primary">View Profile</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

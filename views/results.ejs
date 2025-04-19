@@ -1,0 +1,73 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <div class="row mb-4">
+    <div class="col-md-8">
+      <h1><%= result.exam_title %> - Results</h1>
+    </div>
+    <div class="col-md-4 text-end">
+      <a href="/exams/dashboard" class="btn btn-outline-primary">Back to Dashboard</a>
+    </div>
+  </div>
+
+  <div class="card shadow mb-4">
+    <div class="card-header bg-<%= result.score >= 60 ? 'success' : 'danger' %> text-white">
+      <h3 class="mb-0">Your Score: <%= result.score.toFixed(1) %>%</h3>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-<%= result.score >= 60 ? 'success' : 'danger' %>">
+        <% if (result.score >= 60) { %>
+          <h4 class="alert-heading">Congratulations!</h4>
+          <p>You have passed the exam.</p>
+        <% } else { %>
+          <h4 class="alert-heading">You didn't pass this time</h4>
+          <p>Please review your answers and try again next time.</p>
+        <% } %>
+      </div>
+      
+      <h4 class="mt-4">Review your answers:</h4>
+      
+      <% questions.forEach(function(question, index) { %>
+        <div class="question-review mb-4 p-3 <%= question.correct_option === question.selected_option ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10' %>">
+          <h5>Question <%= index + 1 %>: <%= question.question_text %></h5>
+          
+          <div class="options-container">
+            <div class="option <%= question.correct_option === 'A' ? 'text-success fw-bold' : '' %> <%= question.selected_option === 'A' && question.correct_option !== 'A' ? 'text-danger fw-bold' : '' %>">
+              A) <%= question.option_a %>
+              <% if (question.correct_option === 'A') { %><span class="badge bg-success">Correct</span><% } %>
+              <% if (question.selected_option === 'A' && question.correct_option !== 'A') { %><span class="badge bg-danger">Your Answer</span><% } %>
+              <% if (question.selected_option === 'A' && question.correct_option === 'A') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
+            </div>
+            
+            <div class="option <%= question.correct_option === 'B' ? 'text-success fw-bold' : '' %> <%= question.selected_option === 'B' && question.correct_option !== 'B' ? 'text-danger fw-bold' : '' %>">
+              B) <%= question.option_b %>
+              <% if (question.correct_option === 'B') { %><span class="badge bg-success">Correct</span><% } %>
+              <% if (question.selected_option === 'B' && question.correct_option !== 'B') { %><span class="badge bg-danger">Your Answer</span><% } %>
+              <% if (question.selected_option === 'B' && question.correct_option === 'B') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
+            </div>
+            
+            <div class="option <%= question.correct_option === 'C' ? 'text-success fw-bold' : '' %> <%= question.selected_option === 'C' && question.correct_option !== 'C' ? 'text-danger fw-bold' : '' %>">
+              C) <%= question.option_c %>
+              <% if (question.correct_option === 'C') { %><span class="badge bg-success">Correct</span><% } %>
+              <% if (question.selected_option === 'C' && question.correct_option !== 'C') { %><span class="badge bg-danger">Your Answer</span><% } %>
+              <% if (question.selected_option === 'C' && question.correct_option === 'C') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
+            </div>
+            
+            <div class="option <%= question.correct_option === 'D' ? 'text-success fw-bold' : '' %> <%= question.selected_option === 'D' && question.correct_option !== 'D' ? 'text-danger fw-bold' : '' %>">
+              D) <%= question.option_d %>
+              <% if (question.correct_option === 'D') { %><span class="badge bg-success">Correct</span><% } %>
+              <% if (question.selected_option === 'D' && question.correct_option !== 'D') { %><span class="badge bg-danger">Your Answer</span><% } %>
+              <% if (question.selected_option === 'D' && question.correct_option === 'D') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
+            </div>
+          </div>
+        </div>
+        
+        <% if (index < questions.length - 1) { %>
+          <hr>
+        <% } %>
+      <% }); %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

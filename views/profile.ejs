@@ -1,0 +1,75 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card shadow mb-4">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">Profile</h3>
+        </div>
+        <div class="card-body text-center">
+          <div class="mb-3">
+            <div class="avatar-placeholder bg-secondary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 100px; height: 100px; font-size: 2rem;">
+              <%= user.fullname.charAt(0) %>
+            </div>
+          </div>
+          <h3><%= user.fullname %></h3>
+          <p class="text-muted"><%= user.username %></p>
+          <p><%= user.email %></p>
+          <hr>
+          <!-- VULNERABLE: XSS in bio field - outputs raw HTML without sanitization -->
+          <div class="bio-container">
+            <h4>Bio</h4>
+            <% if (user.bio && user.bio.length > 0) { %>
+              <div class="bio-text"><%- user.bio %></div>
+            <% } else { %>
+              <p class="text-muted">No bio information</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h3 class="mb-0">Edit Profile</h3>
+        </div>
+        <div class="card-body">
+          <form action="/profile/update" method="POST">
+            <div class="mb-3">
+              <label for="fullname" class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="fullname" name="fullname" value="<%= user.fullname %>" required>
+            </div>
+            <div class="mb-3">
+              <label for="email" class="form-label">Email</label>
+              <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" required>
+            </div>
+            <div class="mb-3">
+              <label for="bio" class="form-label">Bio (HTML allowed)</label>
+              <textarea class="form-control" id="bio" name="bio" rows="5"><%= user.bio %></textarea>
+              <small class="form-text text-muted">You can use HTML to format your bio</small>
+            </div>
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary">Update Profile</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <div class="xss-demo mt-4">
+        <div class="alert alert-warning">
+          <h4 class="alert-heading">Warning: XSS Vulnerability Demo</h4>
+          <p>This page intentionally contains a Cross-Site Scripting (XSS) vulnerability for educational purposes.</p>
+          <p>The bio field is not sanitized, so any HTML or JavaScript entered there will be executed when viewed.</p>
+          <hr>
+          <p class="mb-0">Example payload: <code>&lt;script&gt;alert('XSS Attack!');&lt;/script&gt;</code></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/profile.js"></script>
+
+<%- include('partials/footer') %>

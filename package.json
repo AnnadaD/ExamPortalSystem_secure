@@ -1,0 +1,19 @@
+{
+  "name": "workspace",
+  "version": "1.0.0",
+  "description": "A full-stack student exam portal built with Node.js, Express, and MySQL. This project is designed to demonstrate common web application security vulnerabilities (SQL Injection and XSS) for educational purposes.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "better-sqlite3": "^11.9.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-session": "^1.18.1",
+    "mysql2": "^3.14.0"
+  }
+}
