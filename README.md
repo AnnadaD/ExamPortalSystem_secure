@@ -36,14 +36,24 @@ This application intentionally contains the following security vulnerabilities:
 
 ### Installation
 
-1. Clone the repository or download the source code
+1. Clone the repository
+   ```
+   git clone <repository-url>
+   cd student-exam-portal
+   ```
 
 2. Install dependencies
    ```
-   npm install express ejs better-sqlite3 express-session
+   npm install
    ```
 
-3. Start the application
+3. Initialize the database (important after cloning)
+   ```
+   node setup.js
+   ```
+   This creates the necessary data directory and database with sample data.
+
+4. Start the application
    ```
    node index.js
    ```
@@ -52,10 +62,15 @@ This application intentionally contains the following security vulnerabilities:
    npx nodemon index.js
    ```
 
-4. Access the application
+5. Access the application
    Open your browser and navigate to http://localhost:5000
+   
+   Note: If you get a "HTTP ERROR 403" or "Access denied" error:
+   - Make sure the data directory and database file have proper permissions
+   - Try accessing with http://127.0.0.1:5000 instead of localhost
+   - Check if port 5000 is already in use by another application
 
-5. Default login credentials:
+6. Default login credentials:
    - Username: john
    - Password: password123
 
