@@ -1,0 +1,49 @@
+Create a full-stack student exam portal website using Node.js and Express for the backend, and EJS (HTML/CSS/JavaScript) for the frontend. Use MySQL as the database. The generated project should be ready for local hosting on my machine.
+
+Features to include:
+
+1. **Student Authentication:**
+   - Signup and Login functionality.
+   - Use raw SQL queries for login (vulnerable to SQL Injection) – do not use prepared statements.
+   - Store passwords in plain text (for demo purposes).
+
+2. **Dashboard:**
+   - Show a list of available exams fetched from the database.
+
+3. **Take Exam:**
+   - Load exam questions from the database.
+   - Include a countdown **timer** (e.g., 15 minutes per exam).
+   - Auto-submit the exam when the timer ends.
+   - Store answers and calculate the score for the student.
+
+4. **Result Page:**
+   - Show the student's score after submission.
+   - Allow students to review their submitted answers.
+
+5. **Profile Page:**
+   - Let students update and view their bio.
+   - Do not sanitize the bio input, allowing Cross-Site Scripting (XSS) vulnerabilities.
+
+6. **Technical Stack:**
+   - **Backend:** Node.js with Express.
+   - **Frontend:** EJS templates, HTML, CSS, JavaScript.
+   - **Database:** MySQL (use `mysql2` for connection).
+   - Do not use any ORM like Sequelize.
+   - Store passwords in plain text (no hashing).
+
+7. **Folder Structure:**
+   - `/routes`: Express routes for login, exams, etc.
+   - `/views`: EJS templates for pages (login, dashboard, exam, etc.).
+   - `/public`: Static assets for CSS and client-side JS.
+   - `index.js`: Main server file.
+   - `db.js`: MySQL connection configuration.
+
+8. **Additional Requirements:**
+   - **Timer functionality:** Use JavaScript on the frontend to implement the countdown timer.
+   - **Vulnerabilities:** Intentionally include SQL Injection (SQLi) in the login route and XSS in the profile page for demonstration.
+   - **No hosting required:** Generate only the code for the project, so I can host it on my own local server.
+   - **README file:** Include a README with instructions on setting up and running the project locally.
+
+Important:
+- The project should be **ready for local hosting**, with detailed setup instructions.
+- Intentionally use insecure practices to demonstrate **SQL Injection** and **XSS** vulnerabilities.
