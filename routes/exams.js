@@ -85,7 +85,7 @@ router.get('/start/:examId', isAuthenticated, (req, res) => {
       
       // 4. Create a new exam attempt
       const result = db.query(
-        'INSERT INTO exam_attempts (student_id, exam_id, start_time) VALUES (?, ?, datetime("now"))',
+        'INSERT INTO exam_attempts (student_id, exam_id, start_time) VALUES (?, ?, CURRENT_TIMESTAMP)',
         [studentId, examId]
       );
       
@@ -159,7 +159,7 @@ router.post('/submit/:attemptId', isAuthenticated, (req, res) => {
       
       // 4. Save the exam results
       const resultInsert = db.query(
-        'INSERT INTO exam_results (student_id, exam_id, score, completion_time) VALUES (?, ?, ?, datetime("now"))',
+        'INSERT INTO exam_results (student_id, exam_id, score, completion_time) VALUES (?, ?, ?, CURRENT_TIMESTAMP)',
         [studentId, examId, score]
       );
       
@@ -175,7 +175,7 @@ router.post('/submit/:attemptId', isAuthenticated, (req, res) => {
       
       // 5. Update attempt status
       db.query(
-        'UPDATE exam_attempts SET completed = 1, end_time = datetime("now") WHERE id = ?',
+        'UPDATE exam_attempts SET completed = 1, end_time = CURRENT_TIMESTAMP WHERE id = ?',
         [attemptId]
       );
       
