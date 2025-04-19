@@ -71,7 +71,7 @@ router.post('/signup', (req, res) => {
   });
 });
 
-// Logout route
+// Logout route1
 router.get('/logout', (req, res) => {
   req.session.destroy(() => {
     res.redirect('/login');
