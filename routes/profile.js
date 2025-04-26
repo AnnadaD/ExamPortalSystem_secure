@@ -27,15 +27,32 @@ router.get('/', isAuthenticated, (req, res) => {
   });
 });
 
-// Update profile - INTENTIONALLY VULNERABLE TO XSS
+// Update profile - SECURE implementation
 router.post('/update', isAuthenticated, (req, res) => {
   const { fullname, email, bio } = req.body;
   const userId = req.session.user.id;
   
-  // VULNERABLE: No sanitization of 'bio' field, allowing XSS attacks
+  // Input validation
+  if (!fullname || !email) {
+    return res.status(400).send('Name and email are required');
+  }
+  
+  // Email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).send('Invalid email format');
+  }
+  
+  // SECURE: Sanitize the bio field to prevent XSS
+  const sanitizeHtml = require('sanitize-html');
+  const sanitizedBio = sanitizeHtml(bio, {
+    allowedTags: ['b', 'i', 'em', 'strong', 'p', 'br'],
+    allowedAttributes: {}
+  });
+  
   db.query(
     'UPDATE students SET fullname = ?, email = ?, bio = ? WHERE id = ?',
-    [fullname, email, bio, userId],
+    [fullname, email, sanitizedBio, userId],
     (err, result) => {
       if (err) {
         console.error('Error updating profile:', err);
@@ -45,7 +62,7 @@ router.post('/update', isAuthenticated, (req, res) => {
       // Update the session user object with new information
       req.session.user.fullname = fullname;
       req.session.user.email = email;
-      req.session.user.bio = bio;
+      req.session.user.bio = sanitizedBio;
       
       res.redirect('/profile');
     }

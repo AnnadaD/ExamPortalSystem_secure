@@ -1,8 +1,29 @@
 const express = require('express');
 const session = require('express-session');
 const path = require('path');
+const helmet = require('helmet');
 const app = express();
 const db = require('./db');
+
+// Use Helmet for security headers
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net"],
+      styleSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "cdn.replit.com"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'", "cdn.jsdelivr.net"],
+      objectSrc: ["'none'"],
+      mediaSrc: ["'self'"],
+      frameSrc: ["'none'"],
+    },
+  },
+  xssFilter: true,
+  noSniff: true,
+  referrerPolicy: { policy: 'same-origin' }
+}));
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -18,13 +39,34 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Session middleware
+// Set up cookie-parser - required for CSRF with cookie option
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+// Session middleware with improved security
 app.use(session({
-  secret: 'exam-portal-secret-key',
+  secret: process.env.SESSION_SECRET || 'exam-portal-secret-key',
   resave: false,
-  saveUninitialized: true,
-  cookie: { maxAge: 3600000 } // 1 hour
+  saveUninitialized: false, // Don't create session until something stored
+  cookie: { 
+    maxAge: 3600000, // 1 hour
+    httpOnly: true, // Cannot be accessed by JavaScript
+    secure: process.env.NODE_ENV === 'production', // Only use HTTPS in production
+    sameSite: 'strict' // Protection against CSRF
+  }
 }));
+
+// CSRF Protection
+const csrf = require('csurf');
+// Initialize CSRF protection after session and cookie-parser
+const csrfProtection = csrf({ cookie: { sameSite: 'strict' } });
+
+// Global middleware for CSRF
+app.use(csrfProtection);
+app.use((req, res, next) => {
+  res.locals.csrfToken = req.csrfToken();
+  next();
+});
 
 // Custom middleware to make user data available to all templates
 app.use((req, res, next) => {
@@ -48,8 +90,21 @@ app.get('/', (req, res) => {
 
 // Error handling middleware
 app.use((err, req, res, next) => {
+  // Handle CSRF token errors
+  if (err.code === 'EBADCSRFTOKEN') {
+    console.error('CSRF attack detected:', err);
+    return res.status(403).render('error', { 
+      message: 'Form submission failed. Try refreshing the page and submitting again.',
+      error: process.env.NODE_ENV === 'development' ? err : {}
+    });
+  }
+  
+  // Handle other errors
   console.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(err.status || 500).render('error', { 
+    message: 'Something went wrong!',
+    error: process.env.NODE_ENV === 'development' ? err : {}
+  });
 });
 
 // Start the server

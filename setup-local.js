@@ -110,12 +110,16 @@ try {
   if (studentCount === 0) {
     console.log('Inserting sample data...');
     
-    // Insert a sample student
+    // Hash the password with bcrypt
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = bcrypt.hashSync('password123', 10);
+    
+    // Insert a sample student with hashed password
     db.prepare(`
       INSERT INTO students (fullname, username, email, password, bio) 
       VALUES (?, ?, ?, ?, ?)
-    `).run('John Doe', 'john', 'john@example.com', 'password123', 'I am a student interested in computer science.');
-    console.log('Sample student created.');
+    `).run('John Doe', 'john', 'john@example.com', hashedPassword, 'I am a student interested in computer science.');
+    console.log('Sample student created with secure password hashing.');
     
     // Insert sample exams
     const examInsertStmt = db.prepare(`
