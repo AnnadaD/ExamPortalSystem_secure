@@ -154,6 +154,23 @@ router.get('/start/:examId', isAuthenticated, (req, res) => {
 router.post('/submit/:attemptId', isAuthenticated, (req, res) => {
   const attemptId = req.params.attemptId;
   const answers = req.body.answers || {};
+  const questionIds = req.body.question_ids || {};
+  
+  // Debug received data
+  console.log('Received answers:', JSON.stringify(answers));
+  console.log('Received question_ids:', JSON.stringify(questionIds));
+  
+  // Create a mapping from index to actual question ID and answer
+  const processedAnswers = {};
+  
+  Object.keys(answers).forEach(index => {
+    const questionId = questionIds[index];
+    if (questionId) {
+      processedAnswers[questionId] = answers[index];
+    }
+  });
+  
+  console.log('Processed answers with actual question IDs:', JSON.stringify(processedAnswers));
   
   // Handle security events from client-side monitoring
   const securityEvent = req.body.security_event;
@@ -233,7 +250,7 @@ router.post('/submit/:attemptId', isAuthenticated, (req, res) => {
       console.log('Total questions:', totalQuestions);
       
       questions.forEach(question => {
-        const studentAnswer = answers[question.id];
+        const studentAnswer = processedAnswers[question.id];
         console.log(`Question ${question.id}: Student answered "${studentAnswer}", Correct answer is "${question.correct_option}"`);
         
         if (studentAnswer && studentAnswer.toUpperCase() === question.correct_option.toUpperCase()) {
@@ -289,14 +306,16 @@ router.post('/submit/:attemptId', isAuthenticated, (req, res) => {
       // Create an array of question IDs from the questions fetched earlier to validate input
       const validQuestionIds = questions.map(q => q.id.toString());
       
-      Object.keys(answers).forEach(questionId => {
-        // Only process answers for valid question IDs
+      // Save each processed answer (these now contain the actual question IDs)
+      Object.keys(processedAnswers).forEach(questionId => {
+        // Double-check that the question ID is valid
         if (validQuestionIds.includes(questionId)) {
           try {
             db.query(
               'INSERT INTO student_answers (result_id, question_id, selected_option) VALUES (?, ?, ?)',
-              [resultId, questionId, answers[questionId]]
+              [resultId, questionId, processedAnswers[questionId]]
             );
+            console.log(`Saved answer for question ${questionId}: ${processedAnswers[questionId]}`);
           } catch (err) {
             console.error(`Error saving answer for question ${questionId}:`, err);
             // Continue with other answers even if one fails
