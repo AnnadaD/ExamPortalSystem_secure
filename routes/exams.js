@@ -174,30 +174,61 @@ router.post('/submit/:attemptId', isAuthenticated, (req, res) => {
   
   // Handle security events from client-side monitoring
   const securityEvent = req.body.security_event;
-  const tabSwitchCount = req.body.tab_switch_count;
+  const tabSwitchCount = parseInt(req.body.tab_switch_count) || 0;
   
-  if (securityEvent === 'navigation_attempt' || tabSwitchCount >= 3) {
-    const studentId = req.session.user.id;
-    const message = securityEvent ? 'Navigation attempt during exam' : 
-                   `Tab switching detected (${tabSwitchCount} times)`;
+  // Always log the attempt with any security data - we'll analyze even if below threshold
+  const studentId = req.session.user.id;
+  let securityNotes = [];
+  
+  // Build an array of security observations
+  if (securityEvent === 'navigation_attempt') {
+    securityNotes.push('Navigation attempt during exam');
+  }
+  
+  if (tabSwitchCount > 0) {
+    securityNotes.push(`Tab switching detected (${tabSwitchCount} times)`);
+  }
+  
+  // Get time elapsed to check for potential speed cheating
+  const attemptInfo = db.query('SELECT exam_id, created_at FROM exam_attempts WHERE id = ?', [attemptId])[0];
+  
+  if (attemptInfo) {
+    const examId = attemptInfo.exam_id;
+    const startTime = new Date(attemptInfo.created_at);
+    const endTime = new Date();
+    const minutesElapsed = (endTime - startTime) / (1000 * 60);
     
-    // Get exam ID from attempt
-    const examId = db.query('SELECT exam_id FROM exam_attempts WHERE id = ?', [attemptId])[0]?.exam_id;
+    // Get exam duration
+    const examInfo = db.query('SELECT duration FROM exams WHERE id = ?', [examId])[0];
     
-    // Log security event
-    if (examId) {
-      db.query(
-        'INSERT INTO security_logs (student_id, exam_id, attempt_id, log_type, message, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [
-          studentId, 
-          examId, 
-          attemptId, 
-          securityEvent ? 'NAVIGATION_ATTEMPT' : 'TAB_SWITCHING', 
-          message,
-          req.headers['x-forwarded-for'] || req.socket.remoteAddress,
-          req.headers['user-agent']
-        ]
-      );
+    if (examInfo) {
+      const expectedDuration = examInfo.duration; // in minutes
+      
+      // If completed in less than 30% of allocated time with good score, flag as suspicious
+      if (minutesElapsed < (expectedDuration * 0.3) && Object.keys(processedAnswers).length >= totalQuestions * 0.7) {
+        securityNotes.push(`Possible timer manipulation detected - exam completed too quickly with high score`);
+        console.log('Security: Possible timer manipulation detected - exam completed too quickly with high score');
+      }
+    }
+    
+    // Log all security events
+    if (securityNotes.length > 0) {
+      try {
+        db.query(
+          'INSERT INTO security_logs (student_id, exam_id, attempt_id, log_type, message, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)',
+          [
+            studentId, 
+            examId, 
+            attemptId, 
+            securityEvent ? 'NAVIGATION_ATTEMPT' : (tabSwitchCount >= 3 ? 'TAB_SWITCHING' : 'GENERAL_SECURITY'),
+            securityNotes.join('; '),
+            req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'localhost',
+            req.headers['user-agent'] || 'Unknown'
+          ]
+        );
+      } catch (err) {
+        console.error('Error logging security event:', err);
+      }
     }
   }
   
