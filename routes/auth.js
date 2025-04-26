@@ -29,7 +29,13 @@ router.post('/login', (req, res) => {
       // All passwords are now bcrypt hashed
       if (bcrypt.compareSync(password, user.password)) {
         req.session.user = user;
-        return res.redirect('/exams/dashboard');
+        
+        // Redirect admins to the admin dashboard
+        if (user.role === 'admin') {
+          return res.redirect('/admin/dashboard');
+        } else {
+          return res.redirect('/exams/dashboard');
+        }
       } else {
         return res.render('login', { error: 'Invalid username or password' });
       }
@@ -63,8 +69,8 @@ router.post('/signup', (req, res) => {
     const bcrypt = require('bcryptjs');
     const hashedPassword = bcrypt.hashSync(password, 10);
     
-    const insertSql = 'INSERT INTO students (fullname, username, email, password, bio) VALUES (?, ?, ?, ?, ?)';
-    db.query(insertSql, [fullname, username, email, hashedPassword, ''], (err, result) => {
+    const insertSql = 'INSERT INTO students (fullname, username, email, password, bio, role) VALUES (?, ?, ?, ?, ?, ?)';
+    db.query(insertSql, [fullname, username, email, hashedPassword, '', 'student'], (err, result) => {
       if (err) {
         console.error('Error creating user:', err);
         return res.render('signup', { error: 'Error creating account' });

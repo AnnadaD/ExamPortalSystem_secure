@@ -1,0 +1,75 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+          <h2 class="mb-0">Security Logs</h2>
+          <a href="/admin/dashboard" class="btn btn-outline-light btn-sm">Back to Dashboard</a>
+        </div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead class="table-dark">
+                <tr>
+                  <th>ID</th>
+                  <th>Type</th>
+                  <th>Student</th>
+                  <th>Exam</th>
+                  <th>Message</th>
+                  <th>IP Address</th>
+                  <th>Timestamp</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (logs && logs.length > 0) { %>
+                  <% logs.forEach(function(log) { %>
+                    <tr class="<%= log.log_type === 'TIMER_MANIPULATION' ? 'table-danger' : (log.log_type === 'NAVIGATION_ATTEMPT' ? 'table-warning' : '') %>">
+                      <td><%= log.id %></td>
+                      <td>
+                        <span class="badge <%= 
+                          log.log_type === 'TIMER_MANIPULATION' ? 'bg-danger' : 
+                          (log.log_type === 'NAVIGATION_ATTEMPT' ? 'bg-warning' : 
+                          (log.log_type === 'TAB_SWITCHING' ? 'bg-info' : 'bg-secondary')) 
+                        %>">
+                          <%= log.log_type %>
+                        </span>
+                      </td>
+                      <td><%= log.student_username %></td>
+                      <td><%= log.exam_title %></td>
+                      <td><%= log.message %></td>
+                      <td><small class="text-muted"><%= log.ip_address %></small></td>
+                      <td><small><%= new Date(log.timestamp).toLocaleString() %></small></td>
+                      <td>
+                        <a href="/admin/student-security/<%= log.student_id %>" class="btn btn-sm btn-outline-primary">
+                          View Student
+                        </a>
+                      </td>
+                    </tr>
+                  <% }); %>
+                <% } else { %>
+                  <tr>
+                    <td colspan="8" class="text-center">No security logs found.</td>
+                  </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="alert alert-info mt-4">
+            <h5>Security Log Types</h5>
+            <ul>
+              <li><span class="badge bg-danger">TIMER_MANIPULATION</span> - Possible exam timer manipulation detected</li>
+              <li><span class="badge bg-warning">NAVIGATION_ATTEMPT</span> - Student attempted to navigate away from exam</li>
+              <li><span class="badge bg-info">TAB_SWITCHING</span> - Excessive tab switching during exam</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

@@ -83,10 +83,13 @@ router.get('/start/:examId', isAuthenticated, (req, res) => {
         return;
       }
       
-      // 4. Create a new exam attempt
+      // 4. Create a new exam attempt with security tracking
+      const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+      const user_agent = req.headers['user-agent'];
+      
       const result = db.query(
-        'INSERT INTO exam_attempts (student_id, exam_id, start_time) VALUES (?, ?, CURRENT_TIMESTAMP)',
-        [studentId, examId]
+        'INSERT INTO exam_attempts (student_id, exam_id, start_time, ip_address, user_agent) VALUES (?, ?, CURRENT_TIMESTAMP, ?, ?)',
+        [studentId, examId, ip_address, user_agent]
       );
       
       if (!result) {
@@ -119,6 +122,35 @@ router.post('/submit/:attemptId', isAuthenticated, (req, res) => {
   const attemptId = req.params.attemptId;
   const answers = req.body.answers || {};
   
+  // Handle security events from client-side monitoring
+  const securityEvent = req.body.security_event;
+  const tabSwitchCount = req.body.tab_switch_count;
+  
+  if (securityEvent === 'navigation_attempt' || tabSwitchCount >= 3) {
+    const studentId = req.session.user.id;
+    const message = securityEvent ? 'Navigation attempt during exam' : 
+                   `Tab switching detected (${tabSwitchCount} times)`;
+    
+    // Get exam ID from attempt
+    const examId = db.query('SELECT exam_id FROM exam_attempts WHERE id = ?', [attemptId])[0]?.exam_id;
+    
+    // Log security event
+    if (examId) {
+      db.query(
+        'INSERT INTO security_logs (student_id, exam_id, attempt_id, log_type, message, ip_address, user_agent) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [
+          studentId, 
+          examId, 
+          attemptId, 
+          securityEvent ? 'NAVIGATION_ATTEMPT' : 'TAB_SWITCHING', 
+          message,
+          req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+          req.headers['user-agent']
+        ]
+      );
+    }
+  }
+  
   // Sequential flow with proper error handling
   const submitExam = async () => {
     try {
@@ -135,6 +167,22 @@ router.post('/submit/:attemptId', isAuthenticated, (req, res) => {
       const examId = attempt.exam_id;
       const studentId = req.session.user.id;
       
+      // Verify this attempt belongs to the current student (security check)
+      if (attempt.student_id !== studentId) {
+        console.error('Security: Attempt ID does not belong to current student');
+        req.session.errorMessage = "Security violation detected. This incident has been logged.";
+        res.redirect('/exams/dashboard');
+        return;
+      }
+      
+      // Check if the exam is already completed
+      if (attempt.completed === 1) {
+        console.error('Security: Attempt to resubmit a completed exam');
+        req.session.errorMessage = "This exam has already been submitted.";
+        res.redirect('/exams/dashboard');
+        return;
+      }
+      
       // 2. Get the questions and calculate the score
       const questions = db.query('SELECT * FROM exam_questions WHERE exam_id = ?', [examId]);
       
@@ -148,14 +196,39 @@ router.post('/submit/:attemptId', isAuthenticated, (req, res) => {
       let totalQuestions = questions.length;
       
       // 3. Calculate score
+      console.log('Calculating exam score:');
+      console.log('Total questions:', totalQuestions);
+      
       questions.forEach(question => {
         const studentAnswer = answers[question.id];
-        if (studentAnswer && studentAnswer === question.correct_option) {
+        console.log(`Question ${question.id}: Student answered "${studentAnswer}", Correct answer is "${question.correct_option}"`);
+        
+        if (studentAnswer && studentAnswer.toUpperCase() === question.correct_option.toUpperCase()) {
           correctAnswers++;
+          console.log(`Question ${question.id}: CORRECT`);
+        } else {
+          console.log(`Question ${question.id}: INCORRECT`);
         }
       });
       
-      const score = (correctAnswers / totalQuestions) * 100;
+      console.log('Correct answers:', correctAnswers);
+      const score = Math.round((correctAnswers / totalQuestions) * 100);
+      console.log('Final score:', score);
+      
+      // Check for time manipulation (security check)
+      const currentTime = new Date();
+      const startTime = new Date(attempt.start_time);
+      const examDuration = db.query('SELECT duration FROM exams WHERE id = ?', [examId])[0].duration;
+      const minExpectedTime = new Date(startTime.getTime() + (examDuration * 60000) * 0.3); // At least 30% of allocated time
+      
+      if (currentTime < minExpectedTime && score > 70) {
+        console.error('Security: Possible timer manipulation detected - exam completed too quickly with high score');
+        // Log the suspicious activity but still save results for review
+        db.query(
+          'INSERT INTO security_logs (student_id, exam_id, attempt_id, log_type, message) VALUES (?, ?, ?, ?, ?)',
+          [studentId, examId, attemptId, 'TIMER_MANIPULATION', 'Completed too quickly with high score']
+        );
+      }
       
       // 4. Save the exam results
       const resultInsert = db.query(
@@ -180,11 +253,24 @@ router.post('/submit/:attemptId', isAuthenticated, (req, res) => {
       );
       
       // 6. Save individual answers
+      // Create an array of question IDs from the questions fetched earlier to validate input
+      const validQuestionIds = questions.map(q => q.id.toString());
+      
       Object.keys(answers).forEach(questionId => {
-        db.query(
-          'INSERT INTO student_answers (result_id, question_id, selected_option) VALUES (?, ?, ?)',
-          [resultId, questionId, answers[questionId]]
-        );
+        // Only process answers for valid question IDs
+        if (validQuestionIds.includes(questionId)) {
+          try {
+            db.query(
+              'INSERT INTO student_answers (result_id, question_id, selected_option) VALUES (?, ?, ?)',
+              [resultId, questionId, answers[questionId]]
+            );
+          } catch (err) {
+            console.error(`Error saving answer for question ${questionId}:`, err);
+            // Continue with other answers even if one fails
+          }
+        } else {
+          console.log(`Skipping invalid question ID: ${questionId}`);
+        }
       });
       
       // 7. Redirect to results page

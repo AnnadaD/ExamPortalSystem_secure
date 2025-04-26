@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Get timer element
+  // Get timer element and form
   const timerElement = document.getElementById('timer');
+  const formElement = document.getElementById('examForm');
   // Convert duration from minutes to seconds
   let timeLeft = duration * 60;
   
@@ -53,7 +54,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Auto-submit the form
     if (timeLeft > 0) {
+      // Log navigation attempt for security monitoring
+      const securityLog = document.createElement('input');
+      securityLog.type = 'hidden';
+      securityLog.name = 'security_event';
+      securityLog.value = 'navigation_attempt';
+      document.getElementById('examForm').appendChild(securityLog);
+      
       formElement.submit();
+    }
+  });
+  
+  // Track tab visibility changes (switching to other tabs/windows)
+  let tabSwitchCount = 0;
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'hidden') {
+      tabSwitchCount++;
+      
+      // Log excessive tab switching (possible cheating attempt)
+      if (tabSwitchCount >= 3) {
+        const securityTabLog = document.createElement('input');
+        securityTabLog.type = 'hidden';
+        securityTabLog.name = 'tab_switch_count';
+        securityTabLog.value = tabSwitchCount;
+        document.getElementById('examForm').appendChild(securityTabLog);
+      }
     }
   });
 });

@@ -12,6 +12,14 @@ This application implements the following security measures:
 4. **CSRF Protection**: All forms include CSRF tokens for protection against cross-site request forgery.
 5. **HTTP Security Headers**: Implemented using Helmet middleware.
 6. **Secure Session Management**: Sessions are configured with secure options.
+7. **Exam Security Measures**:
+   - Timer manipulation detection
+   - Student identity verification for submissions
+   - Tab switching detection to prevent cheating
+   - Navigation attempt logging
+   - IP address and user-agent tracking
+   - Comprehensive security audit logs
+8. **Security Monitoring Dashboard**: Admin interface to track and monitor security violations.
 
 The application is designed with security best practices for educational purposes.
 
@@ -74,18 +82,24 @@ The application is designed with security best practices for educational purpose
    - Check if port 5000 is already in use by another application
 
 6. Default login credentials:
-   - Username: john
-   - Password: password123
+   - Regular user:
+     - Username: john
+     - Password: password123
+   - Admin user:
+     - Username: admin
+     - Password: admin123
+     - Access the admin security dashboard at: http://localhost:5000/admin/dashboard
 
 ## Database Schema
 
 The application uses the following database tables:
-- `students`: Stores student account information
+- `students`: Stores student account information (including role-based access control)
 - `exams`: Contains information about available exams
 - `exam_questions`: Stores questions for each exam
-- `exam_attempts`: Tracks when a student starts an exam
+- `exam_attempts`: Tracks when a student starts an exam (with IP and user-agent tracking)
 - `exam_results`: Stores the students' exam scores
 - `student_answers`: Records the answers submitted by students
+- `security_logs`: Records security incidents with timestamps, IP addresses, and user-agents
 
 ## Security Implementation
 
@@ -168,6 +182,20 @@ The application uses SQLite as its database, which stores all data in a file at 
    - All database queries use parameterized statements
    - Protection against SQL injection attacks
 
+6. **Exam Security System**
+   - Timer manipulation detection to prevent cheating
+   - User verification for all exam submissions
+   - Tab switching detection to prevent using other resources
+   - Navigation attempt tracking and logging
+   - IP address and user-agent monitoring
+   - Security violation logging with timestamps and details
+
+7. **Admin Security Dashboard**
+   - Secure admin interface restricted by role-based authentication
+   - Real-time monitoring of security violations
+   - Student security profiles with incident history
+   - Visual indicators for high-risk behavior
+
 ## Testing Security Features
 
 You can verify the security features implemented in this application:
@@ -192,3 +220,17 @@ You can verify the security features implemented in this application:
 
 4. **XSS Protection**: Try entering HTML or JavaScript in the profile bio field.
    The application will sanitize these inputs, removing potentially dangerous tags and attributes.
+
+5. **Exam Security Features**:
+   - **Timer Manipulation**: Start an exam, then try to submit it very quickly with a high score.
+     The system will log this suspicious activity.
+   - **Tab Switching**: During an exam, try switching to another browser tab multiple times.
+     The system will detect and log this behavior.
+   - **Navigation Attempts**: Try to navigate away from the exam page.
+     The system will log this attempt and submit your exam.
+   
+6. **Admin Security Dashboard**:
+   - Log in with the admin credentials (username: admin, password: admin123)
+   - Visit http://localhost:5000/admin/dashboard
+   - Navigate to the security logs section to view all security violations
+   - Click on a student's username to view their detailed security profile

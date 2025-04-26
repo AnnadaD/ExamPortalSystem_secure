@@ -1,0 +1,130 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card mb-4">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h2 class="mb-0">Student Security Report: <%= student.username %></h2>
+          <a href="/admin/security-logs" class="btn btn-outline-light btn-sm">Back to Security Logs</a>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="card mb-3">
+                <div class="card-header bg-secondary text-white">
+                  <h5 class="mb-0">Student Information</h5>
+                </div>
+                <div class="card-body">
+                  <p><strong>ID:</strong> <%= student.id %></p>
+                  <p><strong>Username:</strong> <%= student.username %></p>
+                  <p><strong>Email:</strong> <%= student.email %></p>
+                  <p><strong>Registration Date:</strong> <%= new Date(student.registration_date).toLocaleDateString() %></p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-md-8">
+              <div class="card">
+                <div class="card-header bg-danger text-white">
+                  <h5 class="mb-0">Security Incidents</h5>
+                </div>
+                <div class="card-body">
+                  <% if (logs && logs.length > 0) { %>
+                    <% 
+                      // Count incidents by type
+                      const timerIncidents = logs.filter(log => log.log_type === 'TIMER_MANIPULATION').length;
+                      const navigationIncidents = logs.filter(log => log.log_type === 'NAVIGATION_ATTEMPT').length;
+                      const tabIncidents = logs.filter(log => log.log_type === 'TAB_SWITCHING').length;
+                      const totalIncidents = logs.length;
+                    %>
+                    
+                    <div class="row mb-4">
+                      <div class="col">
+                        <div class="card bg-danger text-white">
+                          <div class="card-body text-center">
+                            <h6>Timer Manipulation</h6>
+                            <h3><%= timerIncidents %></h3>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col">
+                        <div class="card bg-warning text-white">
+                          <div class="card-body text-center">
+                            <h6>Navigation Attempts</h6>
+                            <h3><%= navigationIncidents %></h3>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col">
+                        <div class="card bg-info text-white">
+                          <div class="card-body text-center">
+                            <h6>Tab Switching</h6>
+                            <h3><%= tabIncidents %></h3>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col">
+                        <div class="card bg-dark text-white">
+                          <div class="card-body text-center">
+                            <h6>Total Incidents</h6>
+                            <h3><%= totalIncidents %></h3>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <% if (totalIncidents >= 3) { %>
+                      <div class="alert alert-danger mb-4">
+                        <strong>Warning:</strong> This student has a high number of security incidents.
+                      </div>
+                    <% } %>
+                    
+                    <div class="table-responsive">
+                      <table class="table table-sm table-hover">
+                        <thead class="table-dark">
+                          <tr>
+                            <th>Date</th>
+                            <th>Type</th>
+                            <th>Exam</th>
+                            <th>Message</th>
+                            <th>IP Address</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <% logs.forEach(function(log) { %>
+                            <tr class="<%= log.log_type === 'TIMER_MANIPULATION' ? 'table-danger' : (log.log_type === 'NAVIGATION_ATTEMPT' ? 'table-warning' : '') %>">
+                              <td><small><%= new Date(log.timestamp).toLocaleString() %></small></td>
+                              <td>
+                                <span class="badge <%= 
+                                  log.log_type === 'TIMER_MANIPULATION' ? 'bg-danger' : 
+                                  (log.log_type === 'NAVIGATION_ATTEMPT' ? 'bg-warning' : 
+                                  (log.log_type === 'TAB_SWITCHING' ? 'bg-info' : 'bg-secondary')) 
+                                %>">
+                                  <%= log.log_type %>
+                                </span>
+                              </td>
+                              <td><%= log.exam_title %></td>
+                              <td><%= log.message %></td>
+                              <td><small class="text-muted"><%= log.ip_address %></small></td>
+                            </tr>
+                          <% }); %>
+                        </tbody>
+                      </table>
+                    </div>
+                  <% } else { %>
+                    <div class="alert alert-success">
+                      <i class="bi bi-check-circle-fill"></i> No security incidents found for this student.
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

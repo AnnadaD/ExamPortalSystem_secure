@@ -29,6 +29,7 @@ app.use(helmet({
 const authRoutes = require('./routes/auth');
 const examRoutes = require('./routes/exams');
 const profileRoutes = require('./routes/profile');
+const adminRoutes = require('./routes/admin');
 
 // Set up EJS as the view engine
 app.set('view engine', 'ejs');
@@ -78,6 +79,7 @@ app.use((req, res, next) => {
 app.use('/', authRoutes);
 app.use('/exams', examRoutes);
 app.use('/profile', profileRoutes);
+app.use('/admin', adminRoutes);
 
 // Home route redirects to login if not logged in, or dashboard if logged in
 app.get('/', (req, res) => {

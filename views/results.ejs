@@ -28,36 +28,57 @@
       <h4 class="mt-4">Review your answers:</h4>
       
       <% questions.forEach(function(question, index) { %>
-        <div class="question-review mb-4 p-3 <%= question.correct_option === question.selected_option ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10' %>">
+        <% 
+          // Normalize case for comparison
+          const isCorrect = question.selected_option && 
+                           question.selected_option.toUpperCase() === question.correct_option.toUpperCase();
+        %>
+        <div class="question-review mb-4 p-3 <%= isCorrect ? 'bg-success bg-opacity-10' : 'bg-danger bg-opacity-10' %>">
           <h5>Question <%= index + 1 %>: <%= question.question_text %></h5>
           
           <div class="options-container">
-            <div class="option <%= question.correct_option === 'A' ? 'text-success fw-bold' : '' %> <%= question.selected_option === 'A' && question.correct_option !== 'A' ? 'text-danger fw-bold' : '' %>">
+            <div class="option <%= question.correct_option.toUpperCase() === 'A' ? 'text-success fw-bold' : '' %> 
+                          <%= question.selected_option && question.selected_option.toUpperCase() === 'A' && 
+                             question.correct_option.toUpperCase() !== 'A' ? 'text-danger fw-bold' : '' %>">
               A) <%= question.option_a %>
-              <% if (question.correct_option === 'A') { %><span class="badge bg-success">Correct</span><% } %>
-              <% if (question.selected_option === 'A' && question.correct_option !== 'A') { %><span class="badge bg-danger">Your Answer</span><% } %>
-              <% if (question.selected_option === 'A' && question.correct_option === 'A') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
+              <% if (question.correct_option.toUpperCase() === 'A') { %><span class="badge bg-success">Correct</span><% } %>
+              <% if (question.selected_option && question.selected_option.toUpperCase() === 'A' && 
+                     question.correct_option.toUpperCase() !== 'A') { %><span class="badge bg-danger">Your Answer</span><% } %>
+              <% if (question.selected_option && question.selected_option.toUpperCase() === 'A' && 
+                     question.correct_option.toUpperCase() === 'A') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
             </div>
             
-            <div class="option <%= question.correct_option === 'B' ? 'text-success fw-bold' : '' %> <%= question.selected_option === 'B' && question.correct_option !== 'B' ? 'text-danger fw-bold' : '' %>">
+            <div class="option <%= question.correct_option.toUpperCase() === 'B' ? 'text-success fw-bold' : '' %> 
+                          <%= question.selected_option && question.selected_option.toUpperCase() === 'B' && 
+                             question.correct_option.toUpperCase() !== 'B' ? 'text-danger fw-bold' : '' %>">
               B) <%= question.option_b %>
-              <% if (question.correct_option === 'B') { %><span class="badge bg-success">Correct</span><% } %>
-              <% if (question.selected_option === 'B' && question.correct_option !== 'B') { %><span class="badge bg-danger">Your Answer</span><% } %>
-              <% if (question.selected_option === 'B' && question.correct_option === 'B') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
+              <% if (question.correct_option.toUpperCase() === 'B') { %><span class="badge bg-success">Correct</span><% } %>
+              <% if (question.selected_option && question.selected_option.toUpperCase() === 'B' && 
+                     question.correct_option.toUpperCase() !== 'B') { %><span class="badge bg-danger">Your Answer</span><% } %>
+              <% if (question.selected_option && question.selected_option.toUpperCase() === 'B' && 
+                     question.correct_option.toUpperCase() === 'B') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
             </div>
             
-            <div class="option <%= question.correct_option === 'C' ? 'text-success fw-bold' : '' %> <%= question.selected_option === 'C' && question.correct_option !== 'C' ? 'text-danger fw-bold' : '' %>">
+            <div class="option <%= question.correct_option.toUpperCase() === 'C' ? 'text-success fw-bold' : '' %> 
+                          <%= question.selected_option && question.selected_option.toUpperCase() === 'C' && 
+                             question.correct_option.toUpperCase() !== 'C' ? 'text-danger fw-bold' : '' %>">
               C) <%= question.option_c %>
-              <% if (question.correct_option === 'C') { %><span class="badge bg-success">Correct</span><% } %>
-              <% if (question.selected_option === 'C' && question.correct_option !== 'C') { %><span class="badge bg-danger">Your Answer</span><% } %>
-              <% if (question.selected_option === 'C' && question.correct_option === 'C') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
+              <% if (question.correct_option.toUpperCase() === 'C') { %><span class="badge bg-success">Correct</span><% } %>
+              <% if (question.selected_option && question.selected_option.toUpperCase() === 'C' && 
+                     question.correct_option.toUpperCase() !== 'C') { %><span class="badge bg-danger">Your Answer</span><% } %>
+              <% if (question.selected_option && question.selected_option.toUpperCase() === 'C' && 
+                     question.correct_option.toUpperCase() === 'C') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
             </div>
             
-            <div class="option <%= question.correct_option === 'D' ? 'text-success fw-bold' : '' %> <%= question.selected_option === 'D' && question.correct_option !== 'D' ? 'text-danger fw-bold' : '' %>">
+            <div class="option <%= question.correct_option.toUpperCase() === 'D' ? 'text-success fw-bold' : '' %> 
+                          <%= question.selected_option && question.selected_option.toUpperCase() === 'D' && 
+                             question.correct_option.toUpperCase() !== 'D' ? 'text-danger fw-bold' : '' %>">
               D) <%= question.option_d %>
-              <% if (question.correct_option === 'D') { %><span class="badge bg-success">Correct</span><% } %>
-              <% if (question.selected_option === 'D' && question.correct_option !== 'D') { %><span class="badge bg-danger">Your Answer</span><% } %>
-              <% if (question.selected_option === 'D' && question.correct_option === 'D') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
+              <% if (question.correct_option.toUpperCase() === 'D') { %><span class="badge bg-success">Correct</span><% } %>
+              <% if (question.selected_option && question.selected_option.toUpperCase() === 'D' && 
+                     question.correct_option.toUpperCase() !== 'D') { %><span class="badge bg-danger">Your Answer</span><% } %>
+              <% if (question.selected_option && question.selected_option.toUpperCase() === 'D' && 
+                     question.correct_option.toUpperCase() === 'D') { %><span class="badge bg-success">Your Answer (Correct)</span><% } %>
             </div>
           </div>
         </div>
