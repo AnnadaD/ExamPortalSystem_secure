@@ -38,10 +38,41 @@ router.get('/dashboard', isAuthenticated, (req, res) => {
   });
 });
 
+// GET - Retake exam
+router.get('/retake/:examId', isAuthenticated, (req, res) => {
+  const examId = req.params.examId;
+  const studentId = req.session.user.id;
+  
+  // Log retake attempt for security monitoring
+  const ip_address = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const user_agent = req.headers['user-agent'];
+  
+  try {
+    // Log the retake attempt in security logs
+    db.query(
+      'INSERT INTO security_logs (student_id, exam_id, attempt_id, log_type, message, ip_address, user_agent) VALUES (?, ?, NULL, ?, ?, ?, ?)',
+      [studentId, examId, 'EXAM_RETAKE', 'Student is retaking an exam', ip_address, user_agent]
+    );
+    
+    // Forward to the regular start exam route but with the retake flag
+    req.session.retake_exam = examId;
+    res.redirect(`/exams/start/${examId}`);
+  } catch (error) {
+    console.error('Error initiating exam retake:', error);
+    res.redirect('/exams/dashboard');
+  }
+});
+
 // GET - Start an exam
 router.get('/start/:examId', isAuthenticated, (req, res) => {
   const examId = req.params.examId;
   const studentId = req.session.user.id;
+  const isRetake = req.session.retake_exam === examId;
+  
+  // Clear the retake flag from session if it exists
+  if (req.session.retake_exam) {
+    delete req.session.retake_exam;
+  }
   
   // Function to handle database errors
   const handleError = (err, message) => {
@@ -54,13 +85,15 @@ router.get('/start/:examId', isAuthenticated, (req, res) => {
   const startExam = async () => {
     try {
       // 1. Check if the student has already taken this exam
-      const checkSql = 'SELECT * FROM exam_results WHERE exam_id = ? AND student_id = ?';
-      const results = db.query(checkSql, [examId, studentId]);
-      
-      if (results && results.length > 0) {
-        // Already taken - redirect to results
-        res.redirect(`/exams/results/${results[0].id}`);
-        return;
+      if (!isRetake) {
+        const checkSql = 'SELECT * FROM exam_results WHERE exam_id = ? AND student_id = ?';
+        const results = db.query(checkSql, [examId, studentId]);
+        
+        if (results && results.length > 0) {
+          // Already taken - redirect to results
+          res.redirect(`/exams/results/${results[0].id}`);
+          return;
+        }
       }
       
       // 2. Fetch exam details

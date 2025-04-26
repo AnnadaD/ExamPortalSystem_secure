@@ -65,7 +65,10 @@
                       <%= result.score.toFixed(1) %>%
                     </span>
                   </div>
-                  <a href="/exams/results/<%= result.id %>" class="btn btn-sm btn-outline-secondary">View</a>
+                  <div class="d-flex gap-1">
+                    <a href="/exams/results/<%= result.id %>" class="btn btn-sm btn-outline-secondary">View</a>
+                    <a href="/exams/retake/<%= result.exam_id %>" class="btn btn-sm btn-outline-success">Retake</a>
+                  </div>
                 </li>
               <% }); %>
             </ul>

@@ -6,7 +6,10 @@
       <h1><%= result.exam_title %> - Results</h1>
     </div>
     <div class="col-md-4 text-end">
-      <a href="/exams/dashboard" class="btn btn-outline-primary">Back to Dashboard</a>
+      <div class="d-flex justify-content-end gap-2">
+        <a href="/exams/retake/<%= result.exam_id %>" class="btn btn-success">Retake Exam</a>
+        <a href="/exams/dashboard" class="btn btn-outline-primary">Back to Dashboard</a>
+      </div>
     </div>
   </div>
 

@@ -30,6 +30,7 @@ The application is designed with security best practices for educational purpose
 - Exam taking with countdown timer
 - Auto-submission when the timer ends
 - Result display showing scores and correct answers
+- Exam retake functionality with security tracking
 - Profile page with editable bio
 
 ## Technical Stack
@@ -189,6 +190,7 @@ The application uses SQLite as its database, which stores all data in a file at 
    - Navigation attempt tracking and logging
    - IP address and user-agent monitoring
    - Security violation logging with timestamps and details
+   - Exam retake tracking and monitoring for pattern analysis
 
 7. **Admin Security Dashboard**
    - Secure admin interface restricted by role-based authentication
@@ -234,3 +236,9 @@ You can verify the security features implemented in this application:
    - Visit http://localhost:5000/admin/dashboard
    - Navigate to the security logs section to view all security violations
    - Click on a student's username to view their detailed security profile
+
+7. **Exam Retake Functionality**:
+   - After completing an exam, you can retake it by clicking the "Retake Exam" button on the results page
+   - You can also retake any previously completed exam from your dashboard
+   - Each retake is logged in the security system for monitoring
+   - Admin users can view patterns of exam retakes in the security logs
